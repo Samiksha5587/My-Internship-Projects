@@ -1,0 +1,89 @@
+import os
+
+# Set PYTHONVERBOSE for more detailed tracebacks
+os.environ['PYTHONVERBOSE'] = '1'
+
+class Quiz:
+    def __init__(self, questions):
+        """
+        Initialize the Quiz object with a list of questions.
+
+        Args:
+        - questions (list): A list of tuples, where each tuple contains the question, options, and correct answer.
+        """
+        self.questions = questions
+        self.score = 0
+
+    def display_question(self, question, options):
+        """
+        Display a question along with its options.
+
+        Args:
+        - question (str): The question to be displayed.
+        - options (list): A list of options for the question.
+        """
+        print(question)
+        for i, option in enumerate(options, start=1):
+            print(f"{i}. {option}")
+
+    def get_user_answer(self):
+        """
+        Get the user's answer for a question, validating the input.
+
+        Returns:
+        - str: The user's answer.
+        """
+        while True:
+            user_answer = input("Enter your answer (a, b, c, or d): ").strip().lower()
+            if user_answer in ['a', 'b', 'c', 'd']:
+                return user_answer
+            else:
+                print("Invalid input. Please enter 'a', 'b', 'c', or 'd'.")
+
+    def check_answer(self, user_answer, correct_answer):
+        """
+        Check if the user's answer matches the correct answer.
+
+        Args:
+        - user_answer (str): The user's answer.
+        - correct_answer (str): The correct answer.
+
+        Returns:
+        - bool: True if the user's answer is correct, False otherwise.
+        """
+        return user_answer == correct_answer
+
+    def run_quiz(self):
+        """
+        Run the quiz and calculate the user's score.
+
+        Returns:
+        - int: The user's score.
+        """
+        for question, options, correct_answer in self.questions:
+            self.display_question(question, options)
+            user_answer = self.get_user_answer()
+            if self.check_answer(user_answer, correct_answer):
+                print("Correct!\n")
+                self.score += 1
+            else:
+                print("Incorrect.")
+                print(f"The correct answer is: {correct_answer}\n")
+        return self.score
+
+
+if __name__ == "__main__":
+    quiz_questions = [
+        ("What is the capital of France?", ["a. London", "b. Paris", "c. Berlin", "d. Rome"], 'b'),
+        ("What is the largest planet in our solar system?", ["a. Earth", "b. Jupiter", "c. Saturn", "d. Mars"], 'b'),
+        ("Who wrote 'To Kill a Mockingbird'?", ["a. Harper Lee", "b. J.K. Rowling", "c. Charles Dickens", "d. Mark Twain"], 'a')
+    ]
+
+    # Create a Quiz object with the provided questions
+    quiz = Quiz(quiz_questions)
+
+    # Run the quiz and get the user's final score
+    user_score = quiz.run_quiz()
+
+    # Display the user's final score
+    print(f"Your final score is: {user_score}/{len(quiz_questions)}")
