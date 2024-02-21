@@ -1,0 +1,33 @@
+def count_words(text):
+    # Split the text into words using whitespace as the delimiter
+    words = text.split()
+    # Count the number of words
+    num_words = len(words)
+    return num_words
+
+def main():
+    print("Welcome to the Word Counter!")
+    print("Please enter a sentence or paragraph below:")
+
+    # Prompt the user to enter text
+    text = input("> ")
+
+    # Check if the input text is empty
+    if not text.strip():
+        print("Error: You haven't entered any text.")
+        return
+
+    # Count the number of words in the input text
+    word_count = count_words(text)
+
+    # Print the number of words to the user
+    print("Word count:", word_count)
+
+if __name__ == "__main__":
+    main()
+
+Output-
+Welcome to the Word Counter!
+Please enter a sentence or paragraph below:
+> My name is Samiksha Dwivedi ,and I am 20 years old
+Word count: 11        
