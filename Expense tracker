@@ -1,0 +1,163 @@
+import datetime
+import json
+import tkinter as tk
+from tkinter import messagebox
+
+class ExpenseTrackerGUI:
+    def __init__(self, root):
+        """
+        Initialize the ExpenseTrackerGUI class.
+
+        Parameters:
+        - root: The Tkinter root window object.
+        """
+        self.root = root
+        self.root.title("Expense Tracker")  # Set window title
+        self.root.geometry("400x400")  # Set window size
+
+        # Load existing expenses from file
+        self.expenses = {}
+        self.load_expenses()
+
+        # Create GUI widgets
+        self.create_widgets()
+
+    def load_expenses(self):
+        """
+        Load existing expenses data from file.
+        """
+        try:
+            with open("expenses.json", "r") as file:
+                self.expenses = json.load(file)
+        except FileNotFoundError:
+            pass  # File not found, initialize with empty dictionary
+
+    def save_expenses(self):
+        """
+        Save expenses data to file.
+        """
+        with open("expenses.json", "w") as file:
+            json.dump(self.expenses, file, indent=4)
+
+    def add_expense(self):
+        """
+        Add new expense to the expenses data.
+        """
+        # Get input values
+        category = self.category_entry.get().strip()
+        amount_str = self.amount_entry.get().strip()
+        description = self.description_entry.get().strip()
+
+        # Validate input fields
+        if not category or not amount_str or not description:
+            messagebox.showerror("Error", "Category, amount, and description fields cannot be empty.")
+            return
+
+        # Convert amount to float and handle invalid input
+        try:
+            amount = float(amount_str)
+        except ValueError:
+            messagebox.showerror("Error", "Amount must be a valid number.")
+            return
+
+        # Get today's date in YYYY-MM-DD format
+        today = datetime.date.today().strftime("%Y-%m-%d")
+
+        # Add expense to expenses data
+        if today in self.expenses:
+            if category in self.expenses[today]:
+                self.expenses[today][category].append({"amount": amount, "description": description})
+            else:
+                self.expenses[today][category] = [{"amount": amount, "description": description}]
+        else:
+            self.expenses[today] = {category: [{"amount": amount, "description": description}]}
+
+        # Save expenses data to file
+        self.save_expenses()
+
+        # Show success message
+        messagebox.showinfo("Success", "Expense added successfully!")
+
+    def view_monthly_summary(self):
+        """
+        View monthly summary of expenses.
+        """
+        # Get current month and year
+        today = datetime.date.today()
+        year, month = today.year, today.month
+
+        # Calculate total expenses for the current month
+        total_expenses = 0
+        for date, categories in self.expenses.items():
+            expense_date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
+            if expense_date.year == year and expense_date.month == month:
+                for amounts in categories.values():
+                    for expense in amounts:
+                        total_expenses += expense["amount"]
+
+        # Show monthly summary
+        messagebox.showinfo("Monthly Summary", f"Total expenses for {today.strftime('%B %Y')}: ${total_expenses:.2f}")
+
+    def view_category_wise_expenditure(self):
+        """
+        View category-wise expenditure.
+        """
+        # Calculate total expenses for each category
+        category_expenses = {}
+        for categories in self.expenses.values():
+            for category, amounts in categories.items():
+                for expense in amounts:
+                    if category in category_expenses:
+                        category_expenses[category] += expense["amount"]
+                    else:
+                        category_expenses[category] = expense["amount"]
+
+        # Show category-wise expenditure
+        message = "Category-wise Expenditure:\n"
+        for category, total_expense in category_expenses.items():
+            message += f"{category}: ${total_expense:.2f}\n"
+        messagebox.showinfo("Category-wise Expenditure", message)
+
+    def create_widgets(self):
+        """
+        Create GUI widgets for the Expense Tracker application.
+        """
+        # Category entry field
+        tk.Label(self.root, text="Category:").pack()
+        self.category_entry = tk.Entry(self.root)
+        self.category_entry.pack()
+
+        # Amount entry field
+        tk.Label(self.root, text="Amount:").pack()
+        self.amount_entry = tk.Entry(self.root)
+        self.amount_entry.pack()
+
+        # Description entry field
+        tk.Label(self.root, text="Description:").pack()
+        self.description_entry = tk.Entry(self.root)
+        self.description_entry.pack()
+
+        # Add expense button
+        add_button = tk.Button(self.root, text="Add Expense", command=self.add_expense)
+        add_button.pack()
+
+        # View monthly summary button
+        summary_button = tk.Button(self.root, text="View Monthly Summary", command=self.view_monthly_summary)
+        summary_button.pack()
+
+        # View category-wise expenditure button
+        category_button = tk.Button(self.root, text="View Category-wise Expenditure", command=self.view_category_wise_expenditure)
+        category_button.pack()
+
+def main():
+    # Create Tkinter root window
+    root = tk.Tk()
+
+    # Create ExpenseTrackerGUI object
+    app = ExpenseTrackerGUI(root)
+
+    # Run the Tkinter event loop
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
